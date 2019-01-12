@@ -97,7 +97,8 @@
 					header("Location: ./project_detail.php?project_id=" . $project_id);
 					break;
 				case 'Chuyển sang Post-Sales':
-					$stmt = $conn->prepare("UPDATE projects SET status = 'postsales'");
+					$stmt = $conn->prepare("UPDATE projects SET status = 'postsales' WHERE project_id = ?");
+					$stmt->bind_param("i", $project_id);
 					$stmt->execute();
 					header("Location: ./project_detail.php?project_id=" . $project_id);
 					break;

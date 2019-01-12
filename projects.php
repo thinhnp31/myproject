@@ -1,64 +1,64 @@
 <?php 
-	session_start();
+session_start();
 
-	require_once "includes/php/_connectdb.php";
+require_once "includes/php/_connectdb.php";
 
-	if (!isset($_SESSION['email'])) {
-		header("Location: ./login.php");
-	}
+if (!isset($_SESSION['email'])) {
+	header("Location: ./login.php");
+}
 
-	if (isset($_GET['submit'])) {
-		switch ($_GET['submit']) {
-			case 'Tạo':
-				$project_name = $_GET['project_name'];
-				$engineer_name = $_GET['engineer_name'];
-				$am_name = $_GET['am_name'];
-				$category = $_GET['category'];
-				$location = $_GET['location'];
-				$customer = $_GET['customer'];
-				$now = date("d-m-Y");
-				$history = $now . " : Tạo dự án";
-				$stmt = $conn->prepare("INSERT INTO projects(project_name, engineer_name, am_name, history, category, location, created_by, customer) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ");
-				$stmt->bind_param("ssssssss", $project_name, $engineer_name, $am_name, $history, $category, $location, $_SESSION['email'], $customer);
-				$stmt->execute();
+if (isset($_GET['submit'])) {
+	switch ($_GET['submit']) {
+		case 'Tạo':
+		$project_name = $_GET['project_name'];
+		$engineer_name = $_GET['engineer_name'];
+		$am_name = $_GET['am_name'];
+		$category = $_GET['category'];
+		$location = $_GET['location'];
+		$customer = $_GET['customer'];
+		$now = date("d-m-Y");
+		$history = $now . " : Tạo dự án";
+		$stmt = $conn->prepare("INSERT INTO projects(project_name, engineer_name, am_name, history, category, location, created_by, customer) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ");
+		$stmt->bind_param("ssssssss", $project_name, $engineer_name, $am_name, $history, $category, $location, $_SESSION['email'], $customer);
+		$stmt->execute();
 
-				$stmt = $conn->prepare("SELECT * FROM categories WHERE category = ?");
-				$stmt->bind_param("s", $category);
-				$stmt->execute();			
-				$result = $stmt->get_result();
-				if ($result->num_rows <= 0) {
-					$stmt = $conn->prepare("INSERT INTO categories(category) VALUES(?) ");
-					$stmt->bind_param("s", $category);
-					$stmt->execute();
-				}
-
-				$stmt = $conn->prepare("SELECT * FROM locations WHERE location = ?");
-				$stmt->bind_param("s", $location);
-				$stmt->execute();			
-				$result = $stmt->get_result();
-				if ($result->num_rows <= 0) {
-					$stmt = $conn->prepare("INSERT INTO locations(location) VALUES(?) ");
-					$stmt->bind_param("s", $location);
-					$stmt->execute();
-				}
-
-				$stmt = $conn->prepare("SELECT * FROM customers WHERE customer = ?");
-				$stmt->bind_param("s", $customer);
-				$stmt->execute();			
-				$result = $stmt->get_result();
-				if ($result->num_rows <= 0) {
-					$stmt = $conn->prepare("INSERT INTO customers(customer) VALUES(?) ");
-					$stmt->bind_param("s", $customer);
-					$stmt->execute();
-				}
-
-				break;					
-			default:
-				# code...
-				break;
+		$stmt = $conn->prepare("SELECT * FROM categories WHERE category = ?");
+		$stmt->bind_param("s", $category);
+		$stmt->execute();			
+		$result = $stmt->get_result();
+		if ($result->num_rows <= 0) {
+			$stmt = $conn->prepare("INSERT INTO categories(category) VALUES(?) ");
+			$stmt->bind_param("s", $category);
+			$stmt->execute();
 		}
-		header("Location: ./projects.php");
+
+		$stmt = $conn->prepare("SELECT * FROM locations WHERE location = ?");
+		$stmt->bind_param("s", $location);
+		$stmt->execute();			
+		$result = $stmt->get_result();
+		if ($result->num_rows <= 0) {
+			$stmt = $conn->prepare("INSERT INTO locations(location) VALUES(?) ");
+			$stmt->bind_param("s", $location);
+			$stmt->execute();
+		}
+
+		$stmt = $conn->prepare("SELECT * FROM customers WHERE customer = ?");
+		$stmt->bind_param("s", $customer);
+		$stmt->execute();			
+		$result = $stmt->get_result();
+		if ($result->num_rows <= 0) {
+			$stmt = $conn->prepare("INSERT INTO customers(customer) VALUES(?) ");
+			$stmt->bind_param("s", $customer);
+			$stmt->execute();
+		}
+
+		break;					
+		default:
+				# code...
+		break;
 	}
+	header("Location: ./projects.php");
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -84,7 +84,7 @@
 
 <body>
 	<?php 
-		require_once "includes/php/_navbar.php";
+	require_once "includes/php/_navbar.php";
 	?>
 
 	<div class="container">
@@ -104,28 +104,28 @@
 
 					<tbody>
 						<?php
-							$stmt = $conn->prepare("SELECT * FROM projects ORDER BY project_id DESC");
-							$stmt->execute();
-							$result = $stmt->get_result();
-							if ($result->num_rows > 0) {
-								while ($row = $result->fetch_assoc()) {
-						?>
-									<tr>
-										<td><?php echo $row['project_id'];?></td>
-										<td><?php echo $row['project_name'];?></td>
-										<td><?php echo $row['engineer_name'];?></td>
-										<td><?php echo $row['am_name'];?></td>
-										<td><?php echo $row['category'];?></td>
-										<td>
-											<form method="GET" action="./project_detail.php">
-												<input type="hidden" name="project_id" value="<?php echo $row['project_id'];?>">
-												<input type="submit" name="submit" class="btn btn-primary" value="Chi tiết">
-											</form>
-										</td>
-									</tr>
-						<?php
-								}
+						$stmt = $conn->prepare("SELECT * FROM projects ORDER BY project_id DESC");
+						$stmt->execute();
+						$result = $stmt->get_result();
+						if ($result->num_rows > 0) {
+							while ($row = $result->fetch_assoc()) {
+								?>
+								<tr>
+									<td><?php echo $row['project_id'];?></td>
+									<td><?php echo $row['project_name'];?></td>
+									<td><?php echo $row['engineer_name'];?></td>
+									<td><?php echo $row['am_name'];?></td>
+									<td><?php echo $row['category'];?></td>
+									<td>
+										<form method="GET" action="./project_detail.php">
+											<input type="hidden" name="project_id" value="<?php echo $row['project_id'];?>">
+											<input type="submit" name="submit" class="btn btn-primary" value="Chi tiết">
+										</form>
+									</td>
+								</tr>
+								<?php
 							}
+						}
 						?>
 					</tbody>
 				</table>
@@ -142,16 +142,16 @@
 						<label>Phụ trách kỹ thuật :</label>
 						<select name="engineer_name" class="form-control">
 							<?php
-								$stmt = $conn->prepare("SELECT * FROM engineers");
-								$stmt->execute();
-								$result = $stmt->get_result();
-								if ($result->num_rows > 0) {
-									while ($row = $result->fetch_assoc()) {
-							?>
-										<option value="<?php echo $row['engineer_name'];?>"><?php echo $row['engineer_name'];?></option>
-							<?php
-									}
+							$stmt = $conn->prepare("SELECT * FROM engineers");
+							$stmt->execute();
+							$result = $stmt->get_result();
+							if ($result->num_rows > 0) {
+								while ($row = $result->fetch_assoc()) {
+									?>
+									<option value="<?php echo $row['engineer_name'];?>"><?php echo $row['engineer_name'];?></option>
+									<?php
 								}
+							}
 							?>
 							<option value="Không rõ">Không rõ</option>
 						</select>
@@ -160,16 +160,16 @@
 						<label>Phụ trách kinh doanh :</label>
 						<select name="am_name" class="form-control">
 							<?php
-								$stmt = $conn->prepare("SELECT * FROM am");
-								$stmt->execute();
-								$result = $stmt->get_result();
-								if ($result->num_rows > 0) {
-									while ($row = $result->fetch_assoc()) {
-							?>
-										<option value="<?php echo $row['am_name'];?>"><?php echo $row['am_name'];?></option>
-							<?php
-									}
+							$stmt = $conn->prepare("SELECT * FROM am");
+							$stmt->execute();
+							$result = $stmt->get_result();
+							if ($result->num_rows > 0) {
+								while ($row = $result->fetch_assoc()) {
+									?>
+									<option value="<?php echo $row['am_name'];?>"><?php echo $row['am_name'];?></option>
+									<?php
 								}
+							}
 							?>
 							<option value="Không rõ">Không rõ</option>
 						</select>
@@ -182,16 +182,16 @@
 							
 							<select name="category" class="form-control" id="category" required>
 								<?php
-									$stmt = $conn->prepare("SELECT * FROM categories");
-									$stmt->execute();
-									$result = $stmt->get_result();
-									if ($result->num_rows > 0) {
-										while ($row = $result->fetch_assoc()) {
-								?>
-											<option value="<?php echo $row['category'];?>"><?php echo $row['category'];?></option>
-								<?php
-										}
+								$stmt = $conn->prepare("SELECT * FROM categories");
+								$stmt->execute();
+								$result = $stmt->get_result();
+								if ($result->num_rows > 0) {
+									while ($row = $result->fetch_assoc()) {
+										?>
+										<option value="<?php echo $row['category'];?>"><?php echo $row['category'];?></option>
+										<?php
 									}
+								}
 								?>
 							</select>
 						</div>
@@ -208,16 +208,16 @@
 							
 							<select name="location" class="form-control" id="location" required>
 								<?php
-									$stmt = $conn->prepare("SELECT * FROM locations");
-									$stmt->execute();
-									$result = $stmt->get_result();
-									if ($result->num_rows > 0) {
-										while ($row = $result->fetch_assoc()) {
-								?>
-											<option value="<?php echo $row['location'];?>"><?php echo $row['location'];?></option>
-								<?php
-										}
+								$stmt = $conn->prepare("SELECT * FROM locations");
+								$stmt->execute();
+								$result = $stmt->get_result();
+								if ($result->num_rows > 0) {
+									while ($row = $result->fetch_assoc()) {
+										?>
+										<option value="<?php echo $row['location'];?>"><?php echo $row['location'];?></option>
+										<?php
 									}
+								}
 								?>
 							</select>
 						</div>
@@ -234,16 +234,16 @@
 							
 							<select name="customer" class="form-control" id="customer" required>
 								<?php
-									$stmt = $conn->prepare("SELECT * FROM customers");
-									$stmt->execute();
-									$result = $stmt->get_result();
-									if ($result->num_rows > 0) {
-										while ($row = $result->fetch_assoc()) {
-								?>
-											<option value="<?php echo $row['customer'];?>"><?php echo $row['customer'];?></option>
-								<?php
-										}
+								$stmt = $conn->prepare("SELECT * FROM customers");
+								$stmt->execute();
+								$result = $stmt->get_result();
+								if ($result->num_rows > 0) {
+									while ($row = $result->fetch_assoc()) {
+										?>
+										<option value="<?php echo $row['customer'];?>"><?php echo $row['customer'];?></option>
+										<?php
 									}
+								}
 								?>
 							</select>
 						</div>
@@ -259,7 +259,7 @@
 	</div>
 
 	<?php 
-		require_once "includes/php/_footer.php";
+	require_once "includes/php/_footer.php";
 	?>
 
 	<script type="text/javascript">
@@ -287,5 +287,5 @@
 </html>
 
 <?php
-	$conn->close();
+$conn->close();
 ?>

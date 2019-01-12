@@ -27,24 +27,77 @@
 	<?php 
 		require_once "includes/php/_navbar.php";
 	?>
+	<?php		 
+		$stmt = $conn->prepare("SELECT YEAR(creation_date) as year FROM `projects` GROUP BY YEAR(creation_date)");
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$years = [];
+		while ($row = $result->fetch_assoc()) {
+			if ($row['year'] != "" ) {
+				array_push($years, $row['year']);
+			}
+		}
+		
+	?>
+	<div class="container mt-4">
+		<div class="row">
+			<div class="col">
+			</div>
+			<div class="col">
+			</div>
+			<div class="col">
+				<form method="POST" action="#">
+					<select class="form-control" name="year">
+						<?php
+							foreach ($years as $year) {
+								if ($year == date("Y")) {
+									echo "<option value='".$year."' selected>".$year."</option>";
+								} else {
+									echo "<option value='".$year."'>".$year."</option>";
+								}
+								
+							}
+						?>
+					</select>
+					<input class="form-control" type="submit" name="submit" value="Lọc">
+				</form>
+			</div>
+		</div>
+	</div>
 	<?php 
-		$stmt = $conn->prepare("SELECT * FROM projects");
+		if (isset($_POST['year'])) {
+			$this_year = $_POST['year'];
+		} else {
+			$this_year = date("Y");
+		}
+		$stmt = $conn->prepare("SELECT * FROM projects WHERE YEAR(creation_date) = ?");
+		$stmt->bind_param("s",$this_year);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$total_projects = $result->num_rows;
 
-		$stmt = $conn->prepare("SELECT * FROM projects WHERE status = 'postsales'");
+		$stmt = $conn->prepare("SELECT * FROM projects WHERE status = 'postsales' AND YEAR(creation_date) = ?");
+		$stmt->bind_param("s",$this_year);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$total_postsales_projects = $result->num_rows;
-
-		$now = date("Y-m-d");
-		$three_months_ago = date("Y-m-d", strtotime($now . "- 3 months"));
-		$stmt = $conn->prepare("SELECT * FROM projects WHERE status = 'presales' AND DATE(last_update) < ?");
-		$stmt->bind_param("s", $three_months_ago);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		$total_forgotten_projects = $result->num_rows;
+		
+		if ($this_year == date("Y")) {
+			$now = date("Y-m-d");
+                	$one_months_ago = date("Y-m-d", strtotime($now . "- 1 month"));
+        	        $stmt = $conn->prepare("SELECT * FROM projects WHERE status = 'presales' AND DATE(last_update) < ? AND YEAR(creation_date) = ?");
+	                $stmt->bind_param("ss", $one_months_ago, $this_year);
+                	$stmt->execute();
+        	        $result = $stmt->get_result();
+	                $total_forgotten_projects = $result->num_rows;
+		} else {
+			$stmt = $conn->prepare("SELECT * FROM projects WHERE status = 'presales' AND YEAR(creation_date) = ?");
+                        $stmt->bind_param("s", $this_year);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $total_forgotten_projects = $result->num_rows;
+				
+		}
 	?>
 	<div class="container">
 		<div class="row mt-4">
@@ -67,7 +120,8 @@
 					</div>
 					<div class="col-4">
 						<?php 
-							$stmt = $conn->prepare("SELECT COUNT(project_name) AS count, engineer_name FROM projects GROUP BY engineer_name ORDER BY count DESC");
+							$stmt = $conn->prepare("SELECT COUNT(project_name) AS count, engineer_name FROM projects WHERE YEAR(creation_date) = ? GROUP BY engineer_name ORDER BY count DESC");
+							$stmt->bind_param("s",$this_year);
 							$stmt->execute();
 							$result = $stmt->get_result();
 							$row = $result->fetch_assoc();
